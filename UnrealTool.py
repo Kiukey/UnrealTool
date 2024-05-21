@@ -91,11 +91,11 @@ class ForestGenerator(QWidget):
     def create_forest(self):
         sqrNbrTrees = int(sqrt(self.treeNumber_slider.value()))
         actor_subsystem = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
+        my_class = unreal.EditorAssetLibrary.load_blueprint_class(self.class_LineEdit.text())
         for i in range(sqrNbrTrees):
             for j in range(sqrNbrTrees):
-                newPos = unreal.Vector(random.randint(self.min_offset_slider.value(),self.max_offset_slider.value()) * i,random.randint(self.min_offset_slider.value(),self.max_offset_slider.value()) * j,0)
-                my_class = unreal.EditorAssetLibrary.load_blueprint_class(self.class_LineEdit.text())
-                actor = actor_subsystem.spawn_actor_from_class(my_class,newPos)
+                offsetPos = unreal.Vector.random_point_in_box_extents(unreal.Vector(self.min_offset_slider.value()*i ,self.min_offset_slider.value()*j,0), unreal.Vector(self.max_offset_slider.value(),self.max_offset_slider.value(),0))
+                actor = actor_subsystem.spawn_actor_from_class(my_class,offsetPos)
                 actor.set_folder_path(self.folder_LineEdit.text())
                 #unreal.SystemLibrary.box_trace_single() //line trace
 
