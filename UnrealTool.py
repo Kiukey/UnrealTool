@@ -11,7 +11,7 @@ class ForestGenerator(QWidget):
         self.create_folder_lineEdit()
         self.create_class_lineEdit()
         self.create_min_offset_slider()
-        self.create_max_offset_slider()
+        self.create_half_extent_slider()
         self.create_TreeNumber_slider()
         self.create_button()
     
@@ -38,29 +38,29 @@ class ForestGenerator(QWidget):
     def create_min_offset_slider(self):
         origin = QWidget(self)
         layout = QHBoxLayout(origin)
-        self.min_offset_label = QLabel("Minimum offset : 10")
-        self.min_offset_slider = QSlider(Qt.Orientation.Horizontal)
-        layout.addWidget(self.min_offset_label)
-        layout.addWidget(self.min_offset_slider)
+        self.offset_label = QLabel("Offset : 10")
+        self.offset_slider = QSlider(Qt.Orientation.Horizontal)
+        layout.addWidget(self.offset_label)
+        layout.addWidget(self.offset_slider)
         self.layout.addWidget(origin)
-        self.min_offset_slider.valueChanged.connect(self.min_offset_changed)
+        self.offset_slider.valueChanged.connect(self.offset_changed)
         layout.setSpacing(10)
-        self.min_offset_slider.setMinimum(10)
-        self.min_offset_slider.setMaximum(1000)
+        self.offset_slider.setMinimum(10)
+        self.offset_slider.setMaximum(1000)
     
-    def create_max_offset_slider(self):
+    def create_half_extent_slider(self):
         origin = QWidget(self)
         layout = QHBoxLayout(origin)
-        self.max_offset_label = QLabel("Maximum offset : 10")
-        self.max_offset_slider = QSlider(Qt.Orientation.Horizontal)
-        layout.addWidget(self.max_offset_label)
-        layout.addWidget(self.max_offset_slider)
+        self.half_extent_label = QLabel("Half extent : 10")
+        self.half_extent_slider = QSlider(Qt.Orientation.Horizontal)
+        layout.addWidget(self.half_extent_label)
+        layout.addWidget(self.half_extent_slider)
         self.layout.addWidget(origin)
-        self.max_offset_slider.valueChanged.connect(self.max_offset_changed)
+        self.half_extent_slider.valueChanged.connect(self.half_extent_changed)
         layout.setSpacing(10)
-        self.max_offset_slider.setMinimum(10)
-        self.max_offset_slider.setMaximum(1000)
-
+        self.half_extent_slider.setMinimum(10)
+        self.half_extent_slider.setMaximum(1000)
+    
     def create_TreeNumber_slider(self):
         origin1 = QWidget(self)
         layout = QHBoxLayout(origin1)
@@ -79,25 +79,45 @@ class ForestGenerator(QWidget):
         self.layout.addWidget(self.create_forest_button)
         self.create_forest_button.clicked.connect(self.create_forest)
     
-    def min_offset_changed(self):
-        self.min_offset_label.setText(str("Minimum offset : {args1}").format(args1 = self.min_offset_slider.value()))
+    def offset_changed(self):
+        self.offset_label.setText(str("Offset : {args1}").format(args1 = self.offset_slider.value()))
 
-    def max_offset_changed(self):
-        self.max_offset_label.setText(str("Maximum offset : {args1}").format(args1 = self.max_offset_slider.value()))
+    def half_extent_changed(self):
+        self.half_extent_label.setText(str("Half Extent : {args1}").format(args1 = self.half_extent_slider.value()))
 
     def treeNumber_changed(self):
         self.treeNumber_label.setText(str("Tree Number : {args1}").format(args1 = self.treeNumber_slider.value()))
 
+    # def raycast_position(self,world : unreal.World,vectorPos : unreal.Vector):
+    #     startingPos = vectorPos + unreal.Vector(0,0,1000)
+    #     endPos = vectorPos + unreal.Vector(0,0,-1000)
+    #     unreal.log(startingPos)
+    #     unreal.log(endPos)
+    #     array = unreal.Array(unreal.Actor)
+    #     out_hit = unreal.SystemLibrary.line_trace_single(world,startingPos,endPos,,True,array,unreal.DrawDebugTrace.FOR_ONE_FRAME)
+    #     if out_hit == None :
+    #         unreal.log("Zob")
+    #         return vectorPos
+    #     else :
+    #         pass
+    #    ### unreal.log(out_hit.to_tuple()
+    #     unreal.log(out_hit.to_tuple().count()) ###ça sort cb ? 
+    #     return vectorPos
+        # unreal.SystemLibrary.box_trace_single(unreal.World.get_world,startingPos,endPos,unreal.Vector(100,100,10),)
+
     def create_forest(self):
         sqrNbrTrees = int(sqrt(self.treeNumber_slider.value()))
         actor_subsystem = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
+        
         my_class = unreal.EditorAssetLibrary.load_blueprint_class(self.class_LineEdit.text())
         for i in range(sqrNbrTrees):
             for j in range(sqrNbrTrees):
-                offsetPos = unreal.Vector.random_point_in_box_extents(unreal.Vector(self.min_offset_slider.value()*i ,self.min_offset_slider.value()*j,0), unreal.Vector(self.max_offset_slider.value(),self.max_offset_slider.value(),0))
+                offsetPos = unreal.Vector.random_point_in_box_extents(unreal.Vector(self.offset_slider.value()*i ,self.offset_slider.value()*j,0), unreal.Vector(self.half_extent_slider.value(),self.half_extent_slider.value(),0))
+                # offsetPos = unreal.Vector(self.min_offset_slider.value()*i ,self.min_offset_slider.value()*j,0), unreal.Vector(self.max_offset_slider.value(),self.max_offset_slider.value(),0)
+                # bpPos = self.raycast_position(unreal.UnrealEditorSubsystem().get_game_world(),offsetPos)
                 actor = actor_subsystem.spawn_actor_from_class(my_class,offsetPos)
                 actor.set_folder_path(self.folder_LineEdit.text())
-                #unreal.SystemLibrary.box_trace_single() //line trace
+
 
     # def create_forest(self):
     #     newPos = unreal.Vector(0,0,0)
